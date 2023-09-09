@@ -17,7 +17,7 @@ class BagFileParser():
         topics_data = self.cursor.execute("SELECT id, name, type FROM topics").fetchall()
         self.topic_type = {name_of:type_of for id_of,name_of,type_of in topics_data}
         self.topic_id = {name_of:id_of for id_of,name_of,type_of in topics_data}
-        self.topic_msg_message = {name_of:get_message(type_of) for id_of,name_of,type_of in topics_data}
+        self.topic_msg_message = {name_of:get_message(type_of) for id_of,name_of,type_of in topics_data if name_of == '/points'}
 
     def __del__(self):
         self.conn.close()
@@ -47,13 +47,12 @@ class BagFileParser():
 class PointCloudConverter:
 
     @staticmethod
-    def write2pcd(messages):
-        for mess in messages:
-            pcd = o3d.geometry.PointCloud()
-            pc_npy  = ros2_numpy.point_cloud2.point_cloud2_to_array(mess)['xyz']
-            pcd.points = o3d.utility.Vector3dVector(pc_npy)
-            o3d.io.write_point_cloud("points_all.pcd", pcd)
-    
+    def write2pcd(msg):
+        pcd = o3d.geometry.PointCloud()
+        pc_npy  = ros2_numpy.point_cloud2.point_cloud2_to_array(msg)['xyz']
+        pcd.points = o3d.utility.Vector3dVector(pc_npy)
+        o3d.io.write_point_cloud("points_new.pcd", pcd)
+
     @staticmethod
     def msg2cloud(msg):
         pc_npy  = ros2_numpy.point_cloud2.point_cloud2_to_array(msg)['xyz']
@@ -62,11 +61,12 @@ class PointCloudConverter:
         return pcd
 
 if __name__ == "__main__":
-    bag_file = '/mnt/c/Hack/Dataset/1/rosbag2_2023_09_04-11_56_58_0.db3'
+    bag_file = '/mnt/c/Hack/Dataset/v1/rosbag2_2023_09_09-18_19_28_0.db3'
 
-    parser = BagFileParser(bag_file, 5)
+    parser = BagFileParser(bag_file, 450)
     
     t1 = time.time()
     for i, (timestamp, msg) in enumerate(parser.get_messages("/points")):
-        pass
+        PointCloudConverter.write2pcd(msg)
+        break
     print(i, time.time() - t1)
