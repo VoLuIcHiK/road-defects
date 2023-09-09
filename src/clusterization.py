@@ -12,6 +12,14 @@ def seed_everything(seed=42):
     random.seed(seed)
     np.random.seed(seed)
 
+def unit_vector(vector):
+    return vector / np.linalg.norm(vector)
+
+def angle_between(v1, v2):
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    return np.rad2deg(np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0)))
+
 class Clusters:
     def __init__(self) -> None:
         pass
@@ -23,11 +31,19 @@ class Clusters:
             ransac_n=3,
             num_iterations=10000
     ):
-        plane_model, inliers = pcd.segment_plane(
-            distance_threshold = distance_threshold,
-            ransac_n = ransac_n,
-            num_iterations = num_iterations
-        )
+        
+        angle = 100
+        while angle > 30 and angle < 150:
+            plane_model, inliers = pcd.segment_plane(
+                distance_threshold = distance_threshold, 
+                ransac_n = ransac_n, 
+                num_iterations = num_iterations
+            )
+            normal = np.array(plane_model[:-1])
+            angle = angle_between(normal, np.array([0., 0., -1.]))
+            if angle > 30 and angle < 150:
+                pcd = pcd.select_by_index(inliers, invert = True)
+        
         plane_cloud = pcd.select_by_index(inliers)
         non_plane_cloud = pcd.select_by_index(inliers, invert = True)
         return plane_cloud, non_plane_cloud, plane_model
@@ -52,23 +68,19 @@ class Clusters:
         min_points=10,
         print_progress=True,
     ):
- # t1 = time.time()
     
         pcd = o3d.io.read_point_cloud('points.pcd')
         
         # VISUALIZE THE POINT CLOUD
-        # o3d.visualization.draw_geometries([pcd])
+        o3d.visualization.draw_geometries([pcd])
         
         t1 = time.time()
         # VOXEL GRID AND DISTANCE DOWNSAMPLING
         print(f"Points before downsampling: {len(pcd.points)} ")
         downpcd = pcd.voxel_down_sample(voxel_size = voxel_size)
-        # downpcd = pcd
-        # distance_filter = distance_matrix(np.array([[0, 0, 0]]), np.asarray(downpcd.points))[0]
-        # downpcd = downpcd.select_by_index(np.where(distance_filter < 20)[0])
-        downpcd = self._distance_filter(downpcd, radius=100)
+        downpcd = self._distance_filter(downpcd, radius=20)
         print(f"Points after downsampling: {len(downpcd.points)}")
-        # o3d.visualization.draw_geometries([downpcd])
+        o3d.visualization.draw_geometries([downpcd])
         
         # RANSAC
         plane_cloud, non_plane_cloud, plane_model = self._ransac(downpcd, distance_threshold, ransac_n, num_iterations)
@@ -79,7 +91,7 @@ class Clusters:
         plane_cloud.paint_uniform_color([1, 0, 0])
         non_plane_cloud.paint_uniform_color([0.6, 0.6, 0.6])
         
-        # o3d.visualization.draw_geometries([plane_cloud, non_plane_cloud])
+        o3d.visualization.draw_geometries([plane_cloud, non_plane_cloud])
 
         # CLUSTRIZATION
         clustring_points = non_plane_cloud
@@ -93,7 +105,7 @@ class Clusters:
         colors = plt.get_cmap("tab20")(labels / (max_label if max_label > 0 else 1))
         colors[labels < 0] = 0
         clustring_points.colors = o3d.utility.Vector3dVector(colors[:, :3])
-        # o3d.visualization.draw_geometries([clustring_points])
+        o3d.visualization.draw_geometries([clustring_points])
         
         # DETECTION BOXES
         bounding_boxes = []
