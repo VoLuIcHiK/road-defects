@@ -94,13 +94,14 @@ class Clusters:
         eps=0.1, 
         min_points=10,
         print_progress=True,
+        radius=5,
         visualize=False
     ):
 
         # VOXEL GRID AND DISTANCE DOWNSAMPLING
         print(f"Points before downsampling: {len(pcd.points)} ")
         downpcd = pcd.voxel_down_sample(voxel_size = voxel_size)
-        downpcd = self._distance_filter(downpcd, radius=5)
+        downpcd = self._distance_filter(downpcd, radius=radius)
         print(f"Points after downsampling: {len(downpcd.points)}")
 
         # RANSAC
