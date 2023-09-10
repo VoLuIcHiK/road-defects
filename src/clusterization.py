@@ -11,6 +11,7 @@ def seed_everything(seed=42):
     os.environ['PYTHONHASHSEED'] = str(seed)
     random.seed(seed)
     np.random.seed(seed)
+    o3d.utility.random.seed(seed)
 
 def unit_vector(vector):
     return vector / np.linalg.norm(vector)
@@ -64,21 +65,21 @@ class Clusters:
         distance_threshold=0.05,
         ransac_n=3,
         num_iterations=10000,
-        eps=1.5, 
+        eps=0.1, 
         min_points=10,
         print_progress=True,
     ):
     
-        pcd = o3d.io.read_point_cloud('points.pcd')
+        pcd = o3d.io.read_point_cloud('project/road-defects/assets/points_new.pcd')
         
         # VISUALIZE THE POINT CLOUD
-        o3d.visualization.draw_geometries([pcd])
+        # o3d.visualization.draw_geometries([pcd])
         
         t1 = time.time()
         # VOXEL GRID AND DISTANCE DOWNSAMPLING
         print(f"Points before downsampling: {len(pcd.points)} ")
         downpcd = pcd.voxel_down_sample(voxel_size = voxel_size)
-        downpcd = self._distance_filter(downpcd, radius=20)
+        downpcd = self._distance_filter(downpcd, radius=5)
         print(f"Points after downsampling: {len(downpcd.points)}")
         o3d.visualization.draw_geometries([downpcd])
         
@@ -130,5 +131,6 @@ class Clusters:
 
 if __name__ == "__main__":
     
+    seed_everything()
     cluster = Clusters()
     cluster.run()
