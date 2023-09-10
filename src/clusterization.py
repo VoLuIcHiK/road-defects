@@ -60,7 +60,7 @@ class Clusters:
     
     def run(
         self,
-        pcd=o3d.io.read_point_cloud('../assets/points_new.pcd'),
+        pcd=o3d.io.read_point_cloud('/home/free4ky/hack/road-defects/assets/points_new.pcd'),
         voxel_size=0.00001,
         distance_threshold=0.05,
         ransac_n=3,
@@ -68,17 +68,20 @@ class Clusters:
         eps=0.1, 
         min_points=10,
         print_progress=True,
+        visualize=False
     ):
         # VISUALIZE THE POINT CLOUD
-        # o3d.visualization.draw_geometries([pcd])
-        
+        if visualize:
+            o3d.visualization.draw_geometries([pcd], window_name="Points before downsampling")
         t1 = time.time()
         # VOXEL GRID AND DISTANCE DOWNSAMPLING
         print(f"Points before downsampling: {len(pcd.points)} ")
         downpcd = pcd.voxel_down_sample(voxel_size = voxel_size)
         downpcd = self._distance_filter(downpcd, radius=5)
         print(f"Points after downsampling: {len(downpcd.points)}")
-        # o3d.visualization.draw_geometries([downpcd])
+
+        if visualize:
+            o3d.visualization.draw_geometries([downpcd], window_name="Points after downsampling and filtering")
         
         # RANSAC
         plane_cloud, non_plane_cloud, plane_model = self._ransac(downpcd, distance_threshold, ransac_n, num_iterations)
@@ -88,29 +91,35 @@ class Clusters:
         
         plane_cloud.paint_uniform_color([1, 0, 0])
         non_plane_cloud.paint_uniform_color([0.6, 0.6, 0.6])
-        
-        # o3d.visualization.draw_geometries([plane_cloud, non_plane_cloud])
+
+        if visualize:
+            o3d.visualization.draw_geometries([plane_cloud, non_plane_cloud], window_name="Selected road points")
 
         # CLUSTRIZATION
         clustring_points = non_plane_cloud
         with o3d.utility.VerbosityContextManager(o3d.utility.VerbosityLevel.Debug) as cm:
             labels = np.array(clustring_points.cluster_dbscan(eps=eps, min_points=min_points, print_progress=print_progress))
 
+        if len(labels) == 0:
+            return []
         max_label = labels.max()
         print(f"point cloud has {max_label + 1} clusters")
-        print(len(labels))
-        print(labels)
+
+        # set gray color for initial points 
+        downpcd.paint_uniform_color([0.6, 0.6, 0.6])
+
+        # set unique colors for clusters
         colors = plt.get_cmap("tab20")(labels / (max_label if max_label > 0 else 1))
-        colors[labels < 0] = 0
+        colors[labels < 0] = 0        
         clustring_points.colors = o3d.utility.Vector3dVector(colors[:, :3])
-        # o3d.visualization.draw_geometries([clustring_points])
+
+        if visualize:
+            o3d.visualization.draw_geometries([clustring_points], window_name="Clusters points")
+
         
         # DETECTION BOXES
         bounding_boxes = []
-        # if len(labels_without_outliers) > 0:
         inds = pd.Series(range(len(labels))).groupby(labels, sort = True).apply(list).tolist()
-        # else:
-            # inds = [] 
         for i in range(1, len(inds)):
             cluster = clustring_points.select_by_index(inds[i])
             bb = cluster.get_axis_aligned_bounding_box()
@@ -118,16 +127,17 @@ class Clusters:
             bounding_boxes.append(bb)
 
         visuals = []
-        visuals.append(clustring_points)
-        downpcd.paint_uniform_color([0.6, 0.6, 0.6])
         visuals.append(downpcd)
+        visuals.append(clustring_points)
         visuals.extend(bounding_boxes)
-        o3d.visualization.draw_geometries(visuals)
-        
+
+        if visualize:
+            o3d.visualization.draw_geometries(visuals, window_name="Detected clusters")
+    
         print(time.time() - t1)        
 
 if __name__ == "__main__":
     
     seed_everything()
     cluster = Clusters()
-    cluster.run()
+    cluster.run(visualize=True)

@@ -3,7 +3,7 @@ from src.clusterization import Clusters
 from src.db3_messages import BagFileParser, PointCloudConverter
 
 if __name__ == '__main__':
-    bag_file = '/mnt/c/Hack/Dataset/v1/rosbag2_2023_09_09-18_19_28_0.db3'
+    bag_file = '/mnt/c/Users/knnag/Downloads/hack/cleardata/rosbag2_2023_09_04-11_56_58_0.db3'
     parser = BagFileParser(bag_file, 5)
     
     clusters = Clusters()
