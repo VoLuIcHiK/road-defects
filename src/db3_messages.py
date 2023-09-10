@@ -25,6 +25,17 @@ class BagFileParser():
         }
         
         self.nav_timestamps, self.nav_pos = self.get_all_nav_pos()
+        self.n_frames = self.get_n_frames() // every_n_frame
+    
+    
+    def get_n_frames(self):
+        topic_id = self.topic_id['/points']
+        
+        query = "SELECT COUNT(*) as count FROM messages WHERE topic_id = {}"
+        self.cursor.execute(query.format(topic_id))
+        row = self.cursor.fetchmany(1)
+        return row[0][0]
+    
 
     def __del__(self):
         self.conn.close()

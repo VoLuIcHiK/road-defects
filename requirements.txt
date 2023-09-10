@@ -1,0 +1,3 @@
+open3d
+ros2-numpy
+gradio
