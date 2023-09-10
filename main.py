@@ -53,4 +53,4 @@ if __name__ == '__main__':
         send_btn = gr.Button(value="Обработать")
         text2 = gr.Textbox()
         send_btn.click(main, inputs=[file], outputs=[text2])
-    block.queue().launch(server_name="0.0.0.0", file_directories=['/tmp'], server_port=7860)
+    block.queue(concurrency_count=20).launch(server_name="0.0.0.0", file_directories=['/tmp'], server_port=7860)
