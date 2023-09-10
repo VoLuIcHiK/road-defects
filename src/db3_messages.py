@@ -1,6 +1,7 @@
 import time
 import sqlite3
 import ros2_numpy
+import numpy as np
 import open3d as o3d
 
 
@@ -17,7 +18,13 @@ class BagFileParser():
         topics_data = self.cursor.execute("SELECT id, name, type FROM topics").fetchall()
         self.topic_type = {name_of:type_of for id_of,name_of,type_of in topics_data}
         self.topic_id = {name_of:id_of for id_of,name_of,type_of in topics_data}
-        self.topic_msg_message = {name_of:get_message(type_of) for id_of,name_of,type_of in topics_data if name_of == '/points'}
+        self.topic_msg_message = {
+            name_of: get_message(type_of)
+            for id_of,name_of,type_of in topics_data
+            if name_of == '/points' or name_of == '/imu_sensor/imu/nav_sat_fix'
+        }
+        
+        self.nav_timestamps, self.nav_pos = self.get_all_nav_pos()
 
     def __del__(self):
         self.conn.close()
@@ -43,10 +50,32 @@ class BagFileParser():
             if len(row):
                 for ROWID, timestamp, data in row[:1]:
                     data = deserialize_message(data, self.topic_msg_message[topic_name])
-                    yield (timestamp, data)
+                    yield (ROWID, timestamp, data)
                     
             else:
                 break
+    
+    
+    def get_all_nav_pos(self):
+        
+        topic_name = "/imu_sensor/imu/nav_sat_fix"
+        topic_id = self.topic_id[topic_name]
+        
+        query = """
+        SELECT timestamp, data
+        FROM messages
+        WHERE topic_id = {}
+        ORDER BY timestamp
+        """
+        self.cursor.execute(query.format(topic_id))
+        rows = self.cursor.fetchall()
+        nav_timestamps = []
+        nav_pos = []
+        for timestamp, data in rows:
+            nav_timestamps.append(timestamp)
+            nav_pos.append(deserialize_message(data, self.topic_msg_message[topic_name]))
+        return np.array(nav_timestamps), nav_pos
+        
 
 class PointCloudConverter:
 
@@ -67,13 +96,10 @@ class PointCloudConverter:
 if __name__ == "__main__":
     bag_file = '/mnt/c/Hack/Dataset/v1/rosbag2_2023_09_09-18_19_28_0.db3'
 
-    parser = BagFileParser(bag_file, 25)
+    parser = BagFileParser(bag_file, 1)
     
     t1 = time.time()
-    for i, (timestamp, msg) in enumerate(parser.get_messages("/points")):
-        # pass
-        if i == 1:
-            PointCloudConverter.write2pcd(msg, 'project/road-defects/assets/points_new.pcd')
-            break
-
+    for i, (ROWID, timestamp, msg) in enumerate(parser.get_messages("/points")):
+        pass
+    
     print(i, time.time() - t1)
