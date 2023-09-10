@@ -80,15 +80,15 @@ class BagFileParser():
 class PointCloudConverter:
 
     @staticmethod
-    def write2pcd(msg, path):
+    def write2pcd_file(data, path):
         pcd = o3d.geometry.PointCloud()
-        pc_npy  = ros2_numpy.point_cloud2.point_cloud2_to_array(msg)['xyz']
+        pc_npy  = ros2_numpy.point_cloud2.point_cloud2_to_array(data)['xyz']
         pcd.points = o3d.utility.Vector3dVector(pc_npy)
         o3d.io.write_point_cloud(path, pcd)
 
     @staticmethod
-    def msg2cloud(msg):
-        pc_npy  = ros2_numpy.point_cloud2.point_cloud2_to_array(msg)['xyz']
+    def data2pcd(data):
+        pc_npy  = ros2_numpy.point_cloud2.point_cloud2_to_array(data)['xyz']
         pcd = o3d.geometry.PointCloud()
         pcd.points = o3d.utility.Vector3dVector(pc_npy)
         return pcd
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     parser = BagFileParser(bag_file, 1)
     
     t1 = time.time()
-    for i, (ROWID, timestamp, msg) in enumerate(parser.get_messages("/points")):
+    for i, (ROWID, timestamp, data) in enumerate(parser.get_messages("/points")):
         pass
     
     print(i, time.time() - t1)

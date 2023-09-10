@@ -60,7 +60,7 @@ class Clusters:
     
     def run(
         self,
-        # pcd,
+        pcd=o3d.io.read_point_cloud('../assets/points_new.pcd'),
         voxel_size=0.00001,
         distance_threshold=0.05,
         ransac_n=3,
@@ -69,9 +69,6 @@ class Clusters:
         min_points=10,
         print_progress=True,
     ):
-    
-        pcd = o3d.io.read_point_cloud('project/road-defects/assets/points_new.pcd')
-        
         # VISUALIZE THE POINT CLOUD
         # o3d.visualization.draw_geometries([pcd])
         
@@ -81,7 +78,7 @@ class Clusters:
         downpcd = pcd.voxel_down_sample(voxel_size = voxel_size)
         downpcd = self._distance_filter(downpcd, radius=5)
         print(f"Points after downsampling: {len(downpcd.points)}")
-        o3d.visualization.draw_geometries([downpcd])
+        # o3d.visualization.draw_geometries([downpcd])
         
         # RANSAC
         plane_cloud, non_plane_cloud, plane_model = self._ransac(downpcd, distance_threshold, ransac_n, num_iterations)
@@ -92,7 +89,7 @@ class Clusters:
         plane_cloud.paint_uniform_color([1, 0, 0])
         non_plane_cloud.paint_uniform_color([0.6, 0.6, 0.6])
         
-        o3d.visualization.draw_geometries([plane_cloud, non_plane_cloud])
+        # o3d.visualization.draw_geometries([plane_cloud, non_plane_cloud])
 
         # CLUSTRIZATION
         clustring_points = non_plane_cloud
@@ -106,7 +103,7 @@ class Clusters:
         colors = plt.get_cmap("tab20")(labels / (max_label if max_label > 0 else 1))
         colors[labels < 0] = 0
         clustring_points.colors = o3d.utility.Vector3dVector(colors[:, :3])
-        o3d.visualization.draw_geometries([clustring_points])
+        # o3d.visualization.draw_geometries([clustring_points])
         
         # DETECTION BOXES
         bounding_boxes = []
