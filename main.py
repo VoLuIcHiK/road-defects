@@ -15,7 +15,7 @@ def main(bag_file, progress=gr.Progress()):
     
     clusters = Clusters()
     bag_file_response = []
-    for (ROWID, timestamp, data) in progress.tqdm(parser.get_messages("/points"), total=parser.n_frames):
+    for i, (ROWID, timestamp, data) in enumerate(parser.get_messages("/points")):
         pcd = PointCloudConverter.data2pcd(data)
         pothole_centroids = clusters.run(
             pcd,
@@ -39,8 +39,10 @@ def main(bag_file, progress=gr.Progress()):
                 'type': 'pothole'
             })
         # if len(response): bag_file_response.append(response)
+        progress(1 / (parser.n_frames - i + 1), desc="Sending Images")
     response = requests.post('http://u1988986.isp.regruhosting.ru/uploadData', json={'markers': bag_file_response})
     print(response.status_code)
+    return "Data has been sent to site"
     
 
 
@@ -49,5 +51,6 @@ if __name__ == '__main__':
     with gr.Blocks() as block:
         file = gr.File()
         send_btn = gr.Button(value="Обработать")
-        send_btn.click(main, inputs=[file])
-    block.queue().launch(server_name="0.0.0.0", file_directories=['/tmp'], server_port='7860')
+        text2 = gr.Textbox()
+        send_btn.click(main, inputs=[file], outputs=[text2])
+    block.queue().launch(server_name="0.0.0.0", file_directories=['/tmp'], server_port=7860)
