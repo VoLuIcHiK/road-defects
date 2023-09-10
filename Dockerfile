@@ -35,4 +35,4 @@ RUN export PATH="/home/$USERNAME/.local/bin:$PATH"
 COPY . .
 RUN pip install -r requirements.txt
 
-CMD ["/bin/bash"]
+CMD ["python3", "main.py"]
