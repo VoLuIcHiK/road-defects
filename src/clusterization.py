@@ -86,7 +86,7 @@ class Clusters:
     
     def run(
         self,
-        pcd=o3d.io.read_point_cloud('..//assets/points_new.pcd'),
+        pcd=None,
         voxel_size=0.00001,
         distance_threshold=0.05,
         ransac_n=3,
@@ -96,19 +96,13 @@ class Clusters:
         print_progress=True,
         visualize=False
     ):
-        # VISUALIZE THE POINT CLOUD
-        if visualize:
-            o3d.visualization.draw_geometries([pcd], window_name="Points before downsampling")
-        t1 = time.time()
+
         # VOXEL GRID AND DISTANCE DOWNSAMPLING
         print(f"Points before downsampling: {len(pcd.points)} ")
         downpcd = pcd.voxel_down_sample(voxel_size = voxel_size)
         downpcd = self._distance_filter(downpcd, radius=5)
         print(f"Points after downsampling: {len(downpcd.points)}")
 
-        if visualize:
-            o3d.visualization.draw_geometries([downpcd], window_name="Points after downsampling and filtering")
-        
         # RANSAC
         plane_cloud, non_plane_cloud, plane_model = self._ransac(downpcd, distance_threshold, ransac_n, num_iterations)
 
@@ -117,9 +111,6 @@ class Clusters:
         
         plane_cloud.paint_uniform_color([1, 0, 0])
         non_plane_cloud.paint_uniform_color([0.6, 0.6, 0.6])
-
-        if visualize:
-            o3d.visualization.draw_geometries([plane_cloud, non_plane_cloud], window_name="Selected road points")
 
         # CLUSTRIZATION
         clustring_points = non_plane_cloud
@@ -130,6 +121,7 @@ class Clusters:
         if len(labels):
             max_label = labels.max()
             print(f"Point cloud has {max_label + 1} clusters")
+            inds = pd.Series(range(len(labels))).groupby(labels, sort = True).apply(list).tolist()
             for label in range(max_label):
                 points_of_cluster = np.asarray(clustring_points.points)[labels==label,:]
                 centroid_of_cluster = np.mean(points_of_cluster, axis=0) 
