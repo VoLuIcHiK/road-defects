@@ -74,6 +74,9 @@
   <img src="https://github.com/devicons/devicon/blob/master/icons/docker/docker-original-wordmark.svg" title="docker" alt="docker" width="40" height="40"/>&nbsp;
 
 ## <a name="7">Запуск </a>
+
+Первый запуск может занимать 10 минут и более.
+
 Для запуска сервиса загрузки:
 1. Склонировать репозиторий `git clone`
 2. В папке проекта выполнить команду `docker-compose up`
