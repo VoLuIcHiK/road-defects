@@ -1,5 +1,6 @@
 import numpy as np
 import argparse
+from tqdm import tqdm
 import requests
 import gradio as gr
 
@@ -8,7 +9,7 @@ from src.clusterization import Clusters
 from src.db3_messages import BagFileParser, PointCloudConverter
 
 
-async def main(bag_file, progress=gr.Progress()):
+def main(bag_file, progress=gr.Progress()):
     seed_everything()
     parser = BagFileParser(bag_file.name, 5)
     
@@ -47,7 +48,6 @@ if __name__ == '__main__':
     
     with gr.Blocks() as block:
         file = gr.File()
-        send_btn = clear = gr.Button(value="Обработать")
-        mark = gr.Markdown()
+        send_btn = gr.Button(value="Обработать")
         send_btn.click(main, inputs=[file])
-    block.queue().launch(server_name="0.0.0.0", file_directories=['/tmp'])
+    block.queue().launch(server_name="0.0.0.0", file_directories=['/tmp'], server_port='7860')
