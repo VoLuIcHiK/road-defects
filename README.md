@@ -1,7 +1,7 @@
 # <p align="center"> Цифрвовой прорыв: сезон ИИ </p>
 ## <p align="center"> Кейс: Распознавание дефектов дорожного покрытия </p>
 <p align="center">
-<img width="743" alt="photo" src="https://github.com/VoLuIcHiK/road-defects/assets/90902903/4f1fc722-3283-4555-b86d-edb4113e140c">
+<img width="743" alt="photo" src="https://github.com/VoLuIcHiK/road-defects/assets/90902903/cfc105ad-56e5-436d-84d8-0b5cbad06709">
 </p>
 
 
@@ -29,11 +29,11 @@
 
 Ниже представлен алгоритм работы ML-части нашего приложения: 
 <p align="center">
-<img width="600" height="400" alt="image" src="">
+<img width="600" height="400" alt="image" src="https://github.com/VoLuIcHiK/road-defects/assets/90902903/0831577f-229d-48ff-b875-e1dd45bbf739">
 </p>
 Схема базы данных: 
 <p align="center">
-<img width="600" height="400" alt="image" src="">
+<img width="600" height="400" alt="image" src="https://github.com/VoLuIcHiK/road-defects/assets/90902903/600c15de-0440-43d3-bd10-1799919c1b65">
 </p>
 
 ## <a name="3">Результат разработки </a>
