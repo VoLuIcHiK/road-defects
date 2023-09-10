@@ -44,7 +44,7 @@
 3. Возможность выбора типа карты;
 4. Загрузка данных на сайте в формате .db3 (в разработке).
 
-Также была реализована программы для детекции ям, база данных для хранения информации (класс дефекта, его координаты и дата обнаружения/обновления), программа для распознавания дефектов дорожного покрытия (выбоина, аллигаторная трещина, поперечная трещина, продольная трещина) на основе видеопотока. 
+Также была реализована программы для детекции ям с помощью данных лидара, база данных для хранения информации (класс дефекта, его координаты и дата обнаружения/обновления), программа для распознавания дефектов дорожного покрытия (выбоина, аллигаторная трещина, поперечная трещина, продольная трещина) на основе видеопотока. 
 
 
 
@@ -62,8 +62,8 @@
   <img src="https://github.com/devicons/devicon/blob/master/icons/css3/css3-plain-wordmark.svg" title="css" alt="css" width="40" height="40"/>&nbsp;
   <img src="https://github.com/devicons/devicon/blob/master/icons/javascript/javascript-original.svg" title="js" alt="js" width="40" height="40"/>&nbsp;
   <img src="https://github.com/devicons/devicon/blob/master/icons/html5/html5-original-wordmark.svg" title="html" alt="html" width="40" height="40"/>&nbsp;
-
-  
+  <img src="https://github.com/devicons/devicon/blob/master/icons/php/php-original.svg" title="php" alt="php" width="40" height="40"/>&nbsp;
+  <img src="https://github.com/devicons/devicon/blob/master/icons/docker/docker-original-wordmark.svg" title="docker" alt="docker" width="40" height="40"/>&nbsp;
 
 ## <a name="7">Запуск </a>
 Для работы с нашем сервисом необходимо:
