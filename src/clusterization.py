@@ -58,9 +58,35 @@ class Clusters:
         distance_filter = distance_matrix(np.array([[0, 0, 0]]), np.asarray(pcd.points))[0]
         return pcd.select_by_index(np.where(distance_filter < radius)[0])
     
+    def visualize(self, downpcd, labels, clustring_points, max_label):
+        # set gray color for initial points 
+        downpcd.paint_uniform_color([0.6, 0.6, 0.6])
+
+        # set unique colors for clusters
+        colors = plt.get_cmap("tab20")(labels / (max_label if max_label > 0 else 1))
+        colors[labels < 0] = 0        
+        clustring_points.colors = o3d.utility.Vector3dVector(colors[:, :3])
+        
+        # DETECTION BOXES
+        bounding_boxes = []
+        inds = pd.Series(range(len(labels))).groupby(labels, sort = True).apply(list).tolist()
+        for i in range(1, len(inds)):
+            cluster = clustring_points.select_by_index(inds[i])
+            bb = cluster.get_axis_aligned_bounding_box()
+            bb.color = (1,0,0)
+            bounding_boxes.append(bb)
+
+        visuals = []
+        visuals.append(downpcd)
+        visuals.append(clustring_points)
+        visuals.extend(bounding_boxes)
+        
+        o3d.visualization.draw_geometries(visuals, window_name="Detected clusters")
+    
+    
     def run(
         self,
-        pcd=o3d.io.read_point_cloud('/home/free4ky/hack/road-defects/assets/points_new.pcd'),
+        pcd=o3d.io.read_point_cloud('..//assets/points_new.pcd'),
         voxel_size=0.00001,
         distance_threshold=0.05,
         ransac_n=3,
@@ -100,41 +126,19 @@ class Clusters:
         with o3d.utility.VerbosityContextManager(o3d.utility.VerbosityLevel.Debug) as cm:
             labels = np.array(clustring_points.cluster_dbscan(eps=eps, min_points=min_points, print_progress=print_progress))
 
-        if len(labels) == 0:
-            return []
-        max_label = labels.max()
-        print(f"point cloud has {max_label + 1} clusters")
+        centroids = []
+        if len(labels):
+            max_label = labels.max()
+            print(f"Point cloud has {max_label + 1} clusters")
+            for label in range(max_label):
+                points_of_cluster = np.asarray(clustring_points.points)[labels==label,:]
+                centroid_of_cluster = np.mean(points_of_cluster, axis=0) 
+                centroids.append(centroid_of_cluster)
+            if visualize: self.visualize(downpcd, labels, clustring_points, max_label)
+        print("================================================================================")
+        return np.array(centroids)
 
-        # set gray color for initial points 
-        downpcd.paint_uniform_color([0.6, 0.6, 0.6])
-
-        # set unique colors for clusters
-        colors = plt.get_cmap("tab20")(labels / (max_label if max_label > 0 else 1))
-        colors[labels < 0] = 0        
-        clustring_points.colors = o3d.utility.Vector3dVector(colors[:, :3])
-
-        if visualize:
-            o3d.visualization.draw_geometries([clustring_points], window_name="Clusters points")
-
-        
-        # DETECTION BOXES
-        bounding_boxes = []
-        inds = pd.Series(range(len(labels))).groupby(labels, sort = True).apply(list).tolist()
-        for i in range(1, len(inds)):
-            cluster = clustring_points.select_by_index(inds[i])
-            bb = cluster.get_axis_aligned_bounding_box()
-            bb.color = (1,0,0)
-            bounding_boxes.append(bb)
-
-        visuals = []
-        visuals.append(downpcd)
-        visuals.append(clustring_points)
-        visuals.extend(bounding_boxes)
-
-        if visualize:
-            o3d.visualization.draw_geometries(visuals, window_name="Detected clusters")
-    
-        print(time.time() - t1)        
+                
 
 if __name__ == "__main__":
     
