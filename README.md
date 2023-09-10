@@ -35,6 +35,14 @@
 <p align="center">
 <img width="600" height="400" alt="image" src="https://github.com/VoLuIcHiK/road-defects/assets/90902903/600c15de-0440-43d3-bd10-1799919c1b65">
 </p>
+Изображение в наборе данных: 
+<p align="center">
+<img width="600" height="400" alt="image" src="https://github.com/VoLuIcHiK/road-defects/assets/90902903/ededb1e9-ee68-4505-88e8-0ca9eaabb352">
+</p>
+Обнаруженные на нем ямы: 
+<p align="center">
+<img width="600" height="400" alt="image" src="https://github.com/VoLuIcHiK/road-defects/assets/90902903/a2ad96cb-bbd0-4cc4-b8fc-e71c9ce1362f">
+</p>
 
 ## <a name="3">Результат разработки </a>
 
